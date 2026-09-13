@@ -2,12 +2,11 @@ import http from 'k6/http';
 import { sleep, check } from 'k6';
 
 export const options = {
-    stages: [
-        { duration: '30s', target: 5 },     // халаалт
-        { duration: '1m', target: 30 },     // өсгөлт
-        { duration: '30s', target: 100 },   // оргил
-        { duration: '30s', target: 0 },     // буулт
-    ],
+    vus: 30, duration: "1m",
+    thresholds: {
+        http_req_duration: ['p(95)<450'],   // baseline p95 = 310ms. 310 * 1.5 = 465. тоймлоод 450ms
+        http_req_failed: ['rate<0.01'],
+    },
 };
 
 export default function () {
