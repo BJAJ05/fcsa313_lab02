@@ -11,42 +11,54 @@
 
 | VU тоо | p90 (ms) | p95 (ms) | Throughput        | Error rate |
 | -----: | -------- | -------- | ----------------- | ---------- |
-|      5 | 307.86   | 310.02   | 6.96 хүсэлт/сек   | 0%         |
-|     30 | 242.72   | 261.1    | 44.36 хүсэлт/сек  | 0%         |
-|    100 | 266.39   | 381.36   | 137.87 хүсэлт/сек | 0%         |
+|      5 | 239.06   | 278.58   | 7.48 хүсэлт/сек   | 0%         |
+|     30 | 223.08   | 236.78   | 44.12 хүсэлт/сек  | 0%         |
+|    100 | 245.02   | 258.78   | 144.17 хүсэлт/сек | 0%         |
 
 Үр дүнгийн файлууд: [results/run-05vu.txt](results/run-05vu.txt), [results/run-30vu.txt](results/run-30vu.txt), [results/run-100vu.txt](results/run-100vu.txt)
 
+Screenshot-ууд:
+
+![5 VU results](results/run-05vu.png)
+
+![30 VU results](results/run-30vu.png)
+
+![100 VU results](results/run-100vu.png)
+
+### Олон шаттай (Stages) хэмжилт
+
+`stages` тохиргоо ашиглан олон шаттай ачааллын туршилтыг ажиллуулсан үр дүн [results/run-stages.txt](results/run-stages.txt):
+- **p(90):** 238.74 ms
+- **p(95):** 251.04 ms
+- **Throughput:** 46.42 хүсэлт/сек
+- **Error rate:** 0%
+
+![results/run-stages.png](results/run-stages.png)
+
+*`options`-д `stages` ашигласан тест кодыг дараа нь `thresholds` болгож өөрчилсөн учраас тусад нь [script_stages.js](script_stages.js) файлд хадгалав.*
+
 ## Threshold (SLO) тохируулан хийсэн хэмжилт
 
-5 VU-тэй туршилтын p95 latency нь 310 мс гэдгээс SLO threshold-оо $310 \cdot 1.5=465 \approx 450$ мс гэж тохируулсан.
-30 VU ажиллуулж хэмжихэд `p(95)=236.79ms, rate=0.00%` үр дүн гарч, тэнцсэн.
-```
-  █ THRESHOLDS 
+5 VU-тэй туршилтын p95 latency нь 278.58 мс гэдгээс SLO threshold-оо $278.58 \cdot 1.5=417.87 \approx 420$ мс гэж тохируулсан.
+30 VU ажиллуулж хэмжихэд `p(95)=240.62ms, rate=0.00%` үр дүн гарч, тестийг давсан. [results/run-threshold-pass.txt](results/run-threshold-pass.txt)
 
-    http_req_duration
-    ✓ 'p(95)<450' p(95)=236.79ms
+![threshold pass start](results/run-threshold-pass-1.png)
 
-    http_req_failed
-    ✓ 'rate<0.01' rate=0.00%
-```
+![threshold pass end](results/run-threshold-pass-2.png)
 
-Харин latency threshold-оо 50мс гэж тохируулж, албаар унагахад дараах үр дүн гарсан:
-```
-  █ THRESHOLDS 
+Харин latency threshold-оо 50мс гэж тохируулж, албаар унагахад дараах үр дүн гарсан: [results/run-threshold-fail.txt](results/run-threshold-fail.txt)
 
-    http_req_duration
-    ✗ 'p(95)<50' p(95)=238.38ms
+![threshold fail start](results/run-threshold-fail-1.png)
 
-    http_req_failed
-    ✓ 'rate<0.01' rate=0.00%
-```
+![threshold fail end](results/run-threshold-fail-2.png)
+
+*Энэ албаар унагах тестийг [script_fail.js](script_fail.js) нэртэйгээр хадгалсан*
 
 ## Дүгнэлт
 
-VU-ийн тоог 5-аас 100 хүртэл нэмэгдүүлэхэд throughput нь секундэд 6.96 хүсэлтээс 137.87 хүсэлт болж өссөн. p(95) latency нь 5 VU-тэй үед 310 мс байснаас 100 VU-тэй үед 381 мс хүрсэн. Энэ нь ачаалал ихсэн үед серверийн хариу үйлдлийн хурд багасч байгааг харуулж байна. Энэ нь хэрэглэгчид мэдэгдэхүйц удаашрал үүсэж эхэлж байгааг, мөн лекцээр үзсэн throughput ба latency зөрчилддөг зарчмыг батлан харуулж байна. Error rate 0% байсан нь `test.k6.io` сервер нь ачааллын үед алдаагүй ажиллаж чадаж байгааг харуулж байна.
+VU-ийн тоог 5-аас 100 хүртэл нэмэгдүүлэхэд throughput нь секундэд 7.48 хүсэлтээс 144.17 хүсэлт болж өссөн. `test.k6.io` сервер нь 5-100 VU хүртэл ачаалал өгөхөд p95 latency 236-278 мс орчим тогтвортой, error rate 0% байсан нь тухайн веб сервер ачаалал даах өндөр чадвартайг харуулж байна. Энэ үр дүн гэхдээ интернетийн хурдаас хамаарсан байж болзошгүй, учир нь 278 мс нь 5 VU-тэй байхад гарсан үр дүн.
 
-SLO latency threshold-ийг 5 VU-тэй туршилтын p95 буюу 310 мс-ийг 1.5-аар үржүүлэн 465 мс гэж бодсныг тоймлон 450 мс гэж тодорхойлсон бөгөөд энэ threshold нь өмнөх гурван түвшний хэмжилт болон 30 VU-тэй SLO-тэй туршилтад хангагдсан. Error rate 0% байсан тул тухайн SLO мөн хангагдсан.
+SLO latency threshold-ийг 5 VU-тэй туршилтын p95 буюу 278.58 мс-ийг 1.5-аар үржүүлэн 417.87 мс гэж бодсныг тоймлон 420 мс гэж тодорхойлсон бөгөөд энэ threshold нь 30 VU-тэй SLO-тэй туршилтад хангагдсан. Error rate 0% байсан тул тухайн SLO мөн хангагдсан.
 
 Threshold latency-г албаар хүндрүүлэхэд k6 нь үр дүнгийн `THRESHOLD` хэсэгт `http_req_duration` буюу latency хэмжилтэд унасан болохыг харуулж, мөн error buffer-д `thresholds on metrics 'http_req_duration' have been crossed` гэсэн алдаа хэвлэж байна. Энэ нь k6 ашиглан SLO хангагдаж байгааг автоматаар шалгах боломжтойг харуулж байна.
 
@@ -70,7 +82,7 @@ Django framework ашиглан бичсэн их сургуулийн сург�
 Prompt-ийн агуулга:
 > `http://localhost:8000/learning/lessonstandart/?page=1&limit=10` API-д зориулан k6 load test бич. 5 VU-тэй энгийн туршилтийн үр дүн: энд [results/local-05vu.txt](results/local-05vu.txt) хэмжилтийн үр дүн хэсгийг өгсөн.
 
-Gemini 3.5 Flash-Lite-аар бичүүлэхэд зөвхөн `vus`, `duration`-ийг тохируулсан, харин ChatGPT 5.6 Luna 1000ms threshold тааруулсан. Хоёул VU тоог 5-аас өөрөөр өгөөгүй. ChatGPT-ийн бичсэн тест:
+Gemini 3.5 Flash-Lite-аар бичүүлэхэд зөвхөн `vus`, `duration`-ийг тохируулсан, харин ChatGPT 5.6 Luna 1000ms threshold тааруулсан. Хоёул VU тоог 5-аас өөрөөр өгөөгүй. ChatGPT-ийн анх бичсэн тест:
 
 ```
 import http from 'k6/http';
@@ -104,4 +116,4 @@ export default function () {
 
 AI-р бичсэн тестийг өөрийнхтэйгөө харьцуулахад SLO threshold-г өгсөн өгөгдлийг ашиглан тооцож, stages ашигласан. Мөн хүсэлт бүрийн авч буй хуудсын дугаар болон хүсэлт хоорондын хугацааг санамсаргүйгээр сонгодог болгосон. Дутмаг тал ажиглагдаагүй.
 
-AI-р бичүүлсэн тест бүр алдаагүй ажилласан. Gemini 3.5 Flash-аар бичүүлсэн тестийн үр дүнг [results/local-ai.txt](results/local-ai.txt) файлд хадгалсан.
+AI-р бичүүлсэн тест бүр алдаагүй ажилласан. Gemini 3.6 Flash Extended моделийн бичсэн тестийн үр дүнг [results/local-ai.txt](results/local-ai.txt) файлд хадгалсан.
